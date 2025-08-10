@@ -1,7 +1,9 @@
 import { Sparkles, CheckCircle } from "lucide-react";
 import * as React from "react";
 
-export function Section({ id, eyebrow, title, subtitle, children }:{ id?: string; eyebrow?: string; title?: string; subtitle?: string; children: React.ReactNode; }){
+export function Section({ id, eyebrow, title, subtitle, children }:{
+  id?: string; eyebrow?: string; title?: string; subtitle?: string; children: React.ReactNode;
+}){
   return (
     <section id={id} className="py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-4">
