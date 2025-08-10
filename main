@@ -1,0 +1,495 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  LineChart,
+  Brain,
+  BarChart3,
+  Calculator,
+  PieChart,
+  Sparkles,
+  NotebookPen,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  ShieldCheck,
+  CheckCircle,
+  Users,
+  TrendingUp,
+  Gauge,
+  Clock
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+
+/*
+  Lightweight Client Router (hash-based) so we can deliver real sub-pages
+  in a single-file React app (works well in canvas). URLs look like:
+  #/          (Home)
+  #/services  (Services landing)
+  #/services/ml, #/services/stats, #/services/ae, #/services/bi, #/services/strategy, #/services/risk
+  #/case-studies, #/process, #/pricing, #/faq, #/contact
+*/
+const useHashRoute = () => {
+  const [route, setRoute] = useState(() => window.location.hash.replace(/^#/, "") || "/");
+  useEffect(() => {
+    const onHash = () => setRoute(window.location.hash.replace(/^#/, "") || "/");
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+  return [route, (to) => (window.location.hash = to)];
+};
+
+const Link = ({ to, children, className }) => (
+  <a href={`#${to}`} className={className}>{children}</a>
+);
+
+// --- UI helpers ---
+const Section = ({ id, eyebrow, title, subtitle, children }) => (
+  <section id={id} className="py-16 md:py-24">
+    <div className="mx-auto max-w-7xl px-4">
+      {(eyebrow || title || subtitle) && (
+        <div className="mb-8 md:mb-12 text-center">
+          {eyebrow && (
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>{eyebrow}</span>
+            </div>
+          )}
+          {title && (
+            <h2 className="text-3xl font-bold tracking-tight md:text-5xl">{title}</h2>
+          )}
+          {subtitle && (
+            <p className="mx-auto mt-4 max-w-3xl text-muted-foreground md:text-lg">{subtitle}</p>
+          )}
+        </div>
+      )}
+      {children}
+    </div>
+  </section>
+);
+
+const Stat = ({ label, value, hint }) => (
+  <div className="rounded-2xl border p-6 text-center">
+    <div className="text-3xl font-extrabold md:text-4xl">{value}</div>
+    <div className="mt-2 text-sm font-medium text-muted-foreground">{label}</div>
+    {hint && <div className="mt-1 text-xs text-muted-foreground/80">{hint}</div>}
+  </div>
+);
+
+const Check = ({ children }) => (
+  <div className="flex items-start gap-3">
+    <CheckCircle className="mt-1 h-5 w-5" />
+    <p className="text-sm text-muted-foreground">{children}</p>
+  </div>
+);
+
+// --- Reusable Service Card (linking to sub-pages) ---
+const ServiceCard = ({ icon: Icon, title, desc, href }) => (
+  <Card className="rounded-2xl">
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <Icon className="h-5 w-5" /> {title}
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm text-muted-foreground">{desc}</p>
+      <div className="mt-4">
+        <Link to={href}><Button size="sm">Explore</Button></Link>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// --- Pages ---
+const Home = () => (
+  <div id="top" className="relative overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,theme(colors.primary/20),transparent_50%)]" />
+    <div className="mx-auto max-w-7xl px-4 pt-16 pb-24 md:pt-24 md:pb-32">
+      <div className="grid items-center gap-10 md:grid-cols-2">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <Badge className="mb-4" variant="secondary">Data to decisions, faster</Badge>
+          <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">Data Science & Statistical Consulting for Real Business Impact</h1>
+          <p className="mt-4 max-w-xl text-muted-foreground md:text-lg">
+            We build analytics that move KPIs—not just slides. From problem framing to deployment, we help you ship models,
+            experiments, and dashboards that your teams actually use.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link to="/contact"><Button size="lg">Get proposal</Button></Link>
+            <Link to="/services"><Button size="lg" variant="outline">Explore services</Button></Link>
+          </div>
+          <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
+            <Stat label="Projects delivered" value="120+" />
+            <Stat label="Avg. KPI uplift" value="18%" hint="median across case studies" />
+            <Stat label="Client NPS" value="72" />
+          </div>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5" /> Sample KPI Impact Snapshot</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-xl border p-4">
+                  <div className="text-sm text-muted-foreground">Credit Approval</div>
+                  <div className="mt-1 text-2xl font-bold">+9.4%</div>
+                  <Check>PD & LGD recalibration with reject inference</Check>
+                </div>
+                <div className="rounded-xl border p-4">
+                  <div className="text-sm text-muted-foreground">Fraud Detection</div>
+                  <div className="mt-1 text-2xl font-bold">-31%</div>
+                  <Check>XGBoost + rules, real-time Kafka scoring</Check>
+                </div>
+                <div className="rounded-xl border p-4">
+                  <div className="text-sm text-muted-foreground">Marketing ROI</div>
+                  <div className="mt-1 text-2xl font-bold">+22%</div>
+                  <Check>MMM + uplift modeling, creative tagging</Check>
+                </div>
+                <div className="rounded-xl border p-4">
+                  <div className="text-sm text-muted-foreground">Ops Time</div>
+                  <div className="mt-1 text-2xl font-bold">-47%</div>
+                  <Check>Automation & dashboard consolidation</Check>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
+
+    {/* Logos */}
+    <div className="border-y bg-background/60">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-8 px-4 py-6 text-xs text-muted-foreground md:gap-12">
+        <span>Python</span><span>R</span><span>SQL</span><span>Spark</span><span>Airflow</span><span>dbt</span><span>Power BI</span><span>Looker</span><span>Tableau</span><span>Vertex AI</span><span>Azure ML</span>
+      </div>
+    </div>
+
+    <ServicesPreview />
+    <CaseStudies />
+  </div>
+);
+
+const ServicesPreview = () => (
+  <Section id="services" eyebrow="What we do" title="Full-stack data science & statistics" subtitle="Explore our specialties.">
+    <div className="grid gap-6 md:grid-cols-3">
+      <ServiceCard icon={Brain} title="ML & Predictive Modeling" desc="From baselines to production: churn, risk, fraud, recs, NLP, CV." href="/services/ml" />
+      <ServiceCard icon={Calculator} title="Statistical Expertise" desc="A/B testing, causal inference, Bayesian, forecasting." href="/services/stats" />
+      <ServiceCard icon={LineChart} title="Analytics Engineering" desc="Data modeling, feature stores, MLOps, observability." href="/services/ae" />
+      <ServiceCard icon={PieChart} title="BI & Decisioning" desc="KPI trees, dashboards, experimentation hubs, playbooks." href="/services/bi" />
+      <ServiceCard icon={NotebookPen} title="Data Strategy" desc="Roadmaps, org design, hiring, vendor selection, literacy." href="/services/strategy" />
+      <ServiceCard icon={ShieldCheck} title="Risk & Compliance" desc="MRM, fairness, PDPA/GDPR, reproducibility." href="/services/risk" />
+    </div>
+  </Section>
+);
+
+const CaseStudies = () => (
+  <Section id="case-studies" eyebrow="Proven outcomes" title="Select case studies" subtitle="Measurable impact across industries.">
+    <div className="grid gap-6 md:grid-cols-3">
+      {[{title: "Credit card acquisition", kpi: "+18% approval", detail: "WOE scorecard + reject inference + policy sim"}, {title: "E‑commerce growth", kpi: "+22% ROAS", detail: "MMM + uplift modeling"}, {title: "Banking AML", kpi: "-35% false positives", detail: "Rules + ML + analyst feedback loop"}].map((c, i) => (
+        <Card key={i} className="rounded-2xl">
+          <CardHeader><CardTitle>{c.title}</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{c.kpi}</div>
+            <p className="mt-2 text-sm text-muted-foreground">{c.detail}</p>
+            <Separator className="my-4" />
+            <div className="space-y-2">
+              <Check>Problem framing & data audit</Check>
+              <Check>Baseline, iteration, and validation</Check>
+              <Check>Deployment & enablement</Check>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </Section>
+);
+
+// --- Service sub-pages ---
+const ServiceLayout = ({ title, icon: Icon, children }) => (
+  <div className="mx-auto max-w-5xl px-4 py-16">
+    <div className="mb-8 flex items-center gap-3">
+      <Icon className="h-6 w-6" />
+      <h1 className="text-3xl font-bold">{title}</h1>
+    </div>
+    <div className="prose prose-neutral dark:prose-invert max-w-none">
+      {children}
+    </div>
+    <div className="mt-10 flex gap-3">
+      <Link to="/contact"><Button>Book a consult</Button></Link>
+      <Link to="/services"><Button variant="outline">Back to services</Button></Link>
+    </div>
+  </div>
+);
+
+const PageServices = () => (
+  <div className="mx-auto max-w-7xl px-4 py-16">
+    <Section title="Services" subtitle="Choose a focus area below.">
+      <ServicesPreview />
+    </Section>
+  </div>
+);
+
+const PageML = () => (
+  <ServiceLayout title="ML & Predictive Modeling" icon={Brain}>
+    <ul>
+      <li>Use cases: churn, CLV, credit risk (PD/LGD/EAD), fraud, recommendations, NLP, OCR/CV.</li>
+      <li>Approach: baseline → ablations → calibration → explainability (SHAP) → deployment.</li>
+      <li>Stack: Python, scikit‑learn, XGBoost/LightGBM, PyTorch, MLflow, feature store.</li>
+      <li>Delivery: API batch/realtime scoring, monitoring (drift/perf), retraining playbook.</li>
+    </ul>
+  </ServiceLayout>
+);
+
+const PageStats = () => (
+  <ServiceLayout title="Statistical Expertise" icon={Calculator}>
+    <ul>
+      <li>Experimental design: power analysis, CUPED, sequential/alpha‑spending.</li>
+      <li>Causal inference: DiD, synthetic control, IV, matching/propensity, uplift.</li>
+      <li>Forecasting: ARIMA/ETS, Prophet, hierarchical, Bayesian small‑data models.</li>
+      <li>Readouts: effect sizes, uncertainty, guardrail metrics, decision trees.</li>
+    </ul>
+  </ServiceLayout>
+);
+
+const PageAE = () => (
+  <ServiceLayout title="Analytics Engineering" icon={LineChart}>
+    <ul>
+      <li>Data modeling with dbt, tests & documentation, data contracts.</li>
+      <li>Pipelines: Airflow, Spark; EL(T) patterns; cost & reliability dashboards.</li>
+      <li>MLOps: CI/CD, model registry, canary, lineage, drift detection.</li>
+      <li>Observability: SLAs/SLOs, data quality checks, incident runbooks.</li>
+    </ul>
+  </ServiceLayout>
+);
+
+const PageBI = () => (
+  <ServiceLayout title="BI & Decisioning" icon={PieChart}>
+    <ul>
+      <li>KPI trees, dashboard design systems, semantic layers, row‑level security.</li>
+      <li>Experimentation hubs: test registry, guardrails, learning database.</li>
+      <li>Decision playbooks with thresholds and actions for frontline ops.</li>
+    </ul>
+  </ServiceLayout>
+);
+
+const PageStrategy = () => (
+  <ServiceLayout title="Data Strategy" icon={NotebookPen}>
+    <ul>
+      <li>Roadmaps tied to business KPIs & data realities; 30/60/90 plans.</li>
+      <li>Org design & hiring plans; capability & literacy programs.</li>
+      <li>Build vs buy; vendor RFPs; governance & budgeting frameworks.</li>
+    </ul>
+  </ServiceLayout>
+);
+
+const PageRisk = () => (
+  <ServiceLayout title="Risk & Compliance" icon={ShieldCheck}>
+    <ul>
+      <li>Model risk management (inventory, validation docs, challenger testing).</li>
+      <li>Bias & fairness assessments, mitigation strategies, monitoring.</li>
+      <li>Privacy & security: PDPA/GDPR alignment, PII minimization, audit trails.</li>
+    </ul>
+  </ServiceLayout>
+);
+
+// --- Company pages ---
+const PageProcess = () => (
+  <Section eyebrow="How we work" title="A clear, outcome‑first process" subtitle="Timeboxed sprints with transparent deliverables and decision checkpoints.">
+    <div className="mx-auto max-w-6xl grid gap-6 md:grid-cols-4 px-4">
+      {[{icon: Users, title: "1) Align", desc: "KPIs, constraints, data reality. Win condition & anti‑goals."},{icon: Gauge, title: "2) Baseline", desc: "Strong baseline with simple models & clear evaluation."},{icon: TrendingUp, title: "3) Iterate", desc: "Feature work, tuning, ablations. Clean notebook→prod path."},{icon: Clock, title: "4) Ship", desc: "Deploy, monitor, document, handover. Measure impact."}].map((p, idx) => (
+        <div key={idx} className="rounded-2xl border p-6">
+          <div className="mb-3 inline-flex rounded-xl border p-2"><p.icon className="h-5 w-5"/></div>
+          <h3 className="font-semibold">{p.title}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
+        </div>
+      ))}
+    </div>
+  </Section>
+);
+
+const PagePricing = () => (
+  <Section eyebrow="Transparent plans" title="Engagement options" subtitle="Start small, scale as trust grows.">
+    <div className="mx-auto max-w-6xl grid gap-6 md:grid-cols-3 px-4">
+      {[{name:"Starter Sprint",price:"$4,900",badge:"2 weeks",features:["Problem framing workshop","Data & KPI audit","Baseline model or dashboard","Roadmap & next steps"]},{name:"Growth",price:"$14,900",badge:"6 weeks",features:["Dedicated team (PM + DS + DE)","2–3 model iterations","Experiment design","Deployment‑ready assets"]},{name:"Partner",price:"Custom",badge:"Quarter+",features:["Outcome‑based milestones","MLOps & governance","Team enablement","On‑call support"]}].map((tier, i) => (
+        <Card key={i} className="rounded-2xl">
+          <CardHeader><div className="flex items-center justify-between"><CardTitle>{tier.name}</CardTitle><Badge variant="secondary">{tier.badge}</Badge></div></CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{tier.price}</div>
+            <Separator className="my-4" />
+            <div className="space-y-2">
+              {tier.features.map((f, idx) => (
+                <div className="flex items-start gap-3" key={idx}><CheckCircle className="mt-1 h-5 w-5" /><span className="text-sm text-muted-foreground">{f}</span></div>
+              ))}
+            </div>
+            <Link to="/contact"><Button className="mt-6 w-full">Get started</Button></Link>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </Section>
+);
+
+const PageFAQ = () => (
+  <Section eyebrow="Questions" title="FAQ">
+    <div className="mx-auto max-w-3xl px-4">
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="item-1"><AccordionTrigger>What deliverables will I receive?</AccordionTrigger><AccordionContent>Code (repos/notebooks), documentation, datasets or schemas, dashboards, and an impact readout with next steps.</AccordionContent></AccordionItem>
+        <AccordionItem value="item-2"><AccordionTrigger>Can you work with our tools and data stack?</AccordionTrigger><AccordionContent>Yes. We adapt to your environment (cloud/on‑prem). We also propose pragmatic improvements if needed.</AccordionContent></AccordionItem>
+        <AccordionItem value="item-3"><AccordionTrigger>Do you handle data privacy and compliance?</AccordionTrigger><AccordionContent>Absolutely—access controls, data minimization, reproducibility, model risk documentation, and PDPA/GDPR alignment.</AccordionContent></AccordionItem>
+        <AccordionItem value="item-4"><AccordionTrigger>What if we just need advice, not builds?</AccordionTrigger><AccordionContent>We offer strategy workshops and retained advisory with flexible hours.</AccordionContent></AccordionItem>
+      </Accordion>
+    </div>
+  </Section>
+);
+
+const PageContact = () => {
+  const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
+  const [status, setStatus] = useState("idle");
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleSubmit = (e) => { e.preventDefault(); setTimeout(() => setStatus("sent"), 500); };
+  return (
+    <Section eyebrow="Let’s talk" title="Book a free 30‑minute consult" subtitle="Tell us about your goals. We’ll suggest an approach and a rough timeline/budget in the first call.">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-2">
+        <Card className="rounded-2xl"><CardHeader><CardTitle className="flex items-center gap-2"><Mail className="h-5 w-5"/> Contact form</CardTitle></CardHeader><CardContent>
+          {status === "sent" ? (<div className="rounded-xl border p-6 text-center"><h4 className="text-xl font-semibold">Thanks! 🎉</h4><p className="mt-2 text-muted-foreground">We’ll get back within 1 business day.</p></div>) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div><label className="mb-1 block text-sm font-medium">Name</label><Input name="name" required value={form.name} onChange={handleChange} placeholder="Your name" /></div>
+                <div><label className="mb-1 block text-sm font-medium">Email</label><Input name="email" type="email" required value={form.email} onChange={handleChange} placeholder="you@company.com" /></div>
+              </div>
+              <div><label className="mb-1 block text-sm font-medium">Company</label><Input name="company" value={form.company} onChange={handleChange} placeholder="Company or team" /></div>
+              <div><label className="mb-1 block text-sm font-medium">What do you want to achieve?</label><Textarea name="message" required value={form.message} onChange={handleChange} placeholder="e.g., reduce churn, improve credit approval, build fraud detection, set up dashboards…" rows={5} /></div>
+              <Button type="submit" className="w-full">Send</Button>
+            </form>
+          )}
+        </CardContent></Card>
+        <Card className="rounded-2xl"><CardHeader><CardTitle className="flex items-center gap-2"><Phone className="h-5 w-5"/> Contact info</CardTitle></CardHeader><CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground"><Mail className="h-4 w-4"/> hello@bhue.com</div>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground"><Phone className="h-4 w-4"/> +66 0000 0000</div>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground"><MapPin className="h-4 w-4"/> Bangkok • Singapore • Remote</div>
+            <Separator />
+            <div className="space-y-2"><h4 className="font-semibold">Typical artifacts</h4><Check>Repo with notebooks, pipelines, and tests</Check><Check>Experiment plan + readout</Check><Check>Dashboard & KPI tree</Check></div>
+          </div>
+        </CardContent></Card>
+      </div>
+    </Section>
+  );
+};
+
+// --- Top shell ---
+export default function BhueSite() {
+  const [route] = useHashRoute();
+
+  const nav = useMemo(() => ([
+    { href: "/", label: "Home" },
+    { href: "/services", label: "Services" },
+    { href: "/case-studies", label: "Case Studies" },
+    { href: "/process", label: "Process" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/faq", label: "FAQ" },
+    { href: "/contact", label: "Contact" }
+  ]), []);
+
+  const Page = useMemo(() => {
+    switch (route) {
+      case "/": return Home;
+      case "/services": return PageServices;
+      case "/services/ml": return PageML;
+      case "/services/stats": return PageStats;
+      case "/services/ae": return PageAE;
+      case "/services/bi": return PageBI;
+      case "/services/strategy": return PageStrategy;
+      case "/services/risk": return PageRisk;
+      case "/case-studies": return CaseStudies;
+      case "/process": return PageProcess;
+      case "/pricing": return PagePricing;
+      case "/faq": return PageFAQ;
+      case "/contact": return PageContact;
+      default: return Home;
+    }
+  }, [route]);
+
+  return (
+    <div className="min-h-screen scroll-smooth bg-gradient-to-b from-background to-muted/20 text-foreground">
+      {/* JSON-LD for SEO */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        name: "Bhue — Data Science & Statistics Consulting",
+        url: "https://bhue.example",
+        logo: "https://bhue.example/logo.png",
+        description: "We help organizations turn data into decisions using analytics, machine learning, and statistical expertise.",
+        areaServed: "Global",
+        serviceType: ["Data Strategy","Machine Learning","A/B Testing","Forecasting","Dashboarding","MLOps"],
+        address: { "@type": "PostalAddress", addressCountry: "TH" },
+        telephone: "+66-0000-0000"
+      }) }} />
+
+      {/* Header / Nav */}
+      <header className="sticky top-0 z-30 w-full border-b bg-background/70 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+          <Link to="/" className="flex items-center gap-2 font-bold"><Brain className="h-6 w-6" /><span>Bhue</span></Link>
+          <nav className="hidden gap-6 md:flex">
+            {nav.map((n) => (
+              <Link key={n.href} to={n.href} className="text-sm text-muted-foreground hover:text-foreground">{n.label}</Link>
+            ))}
+          </nav>
+          <div className="flex items-center gap-3">
+            <Link to="/contact"><Button size="sm"><Calendar className="mr-2 h-4 w-4" /> Book a free consult</Button></Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Routed page */}
+      <Page />
+
+      {/* Footer */}
+      <footer className="border-t">
+        <div className="mx-auto max-w-7xl px-4 py-10">
+          <div className="grid gap-8 md:grid-cols-4">
+            <div>
+              <div className="flex items-center gap-2 font-bold"><Brain className="h-5 w-5"/> Bhue</div>
+              <p className="mt-3 text-sm text-muted-foreground">Turning data into decisions since 2018.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold">Company</h4>
+              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/services" className="hover:text-foreground">Services</Link></li>
+                <li><Link to="/case-studies" className="hover:text-foreground">Case Studies</Link></li>
+                <li><Link to="/pricing" className="hover:text-foreground">Pricing</Link></li>
+                <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold">Legal</h4>
+              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                <li>Privacy</li>
+                <li>Terms</li>
+                <li>Security</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold">Newsletter</h4>
+              <p className="mt-2 text-sm text-muted-foreground">Monthly insights on analytics & experimentation.</p>
+              <div className="mt-3 flex gap-2">
+                <Input placeholder="you@company.com" />
+                <Button>Subscribe</Button>
+              </div>
+            </div>
+          </div>
+          <div className="mt-8 text-xs text-muted-foreground">© {new Date().getFullYear()} Bhue. All rights reserved.</div>
+        </div>
+      </footer>
+
+      {/* Floating CTA */}
+      <Link to="/contact" className="fixed bottom-5 right-5"><Button size="lg" className="rounded-full shadow-xl"><Calendar className="mr-2 h-4 w-4"/> Book a free consult</Button></Link>
+    </div>
+  );
+}
